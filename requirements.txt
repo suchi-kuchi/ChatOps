@@ -1,0 +1,12 @@
+# python -m uvicorn app.main:app --reload
+# to run the uvicorn server with auto-reload for development
+# M2--http://127.0.0.1:8080/api/json
+# M3--http://127.0.0.1:8080/job/ChatOps-Test-Job/api/json
+# M4--http://127.0.0.1:8080/job/ChatOps-Test-Job/lastBuild/consoleText
+# after adding teams code
+# M5--http://localhost:3978/health
+# m5--http://localhost:3978/jenkins/jobs
+http://localhost:3978/api/messages
+ChatOps-Test-Job
+http://localhost:3978/ChatOps-Test-Job/messages
+to

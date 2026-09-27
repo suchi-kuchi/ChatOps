@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException
-
 from app.jenkins_client import JenkinsClient
+from fastapi import FastAPI, HTTPException
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 app = FastAPI(

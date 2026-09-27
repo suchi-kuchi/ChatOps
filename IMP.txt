@@ -1,3 +1,13 @@
+To run --
+uvicorn app.main:app --reload --port 3978
+
+git commands
+---
+git status
+git add .
+git commit -m "Add Jenkins ChatOps chatbot UI and chat service"
+git push
+
  IPv4 Address. . . . . . . . . . . : 10.130.203.246
 11382159e4ffba69965e823bd96192dd66-- new token-27/9/26 not expires
 -----------
@@ -36,3 +46,11 @@ RS
   "intent": "status",
   "job_name": "ChatOps-Test-Job"
 }
+------
+http://127.0.0.1:3978/chat
+Jenkins UI
+
+shows Jenkins job
+latets build
+check job status
+view logs

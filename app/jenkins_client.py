@@ -15,15 +15,20 @@ class JenkinsClient:
         if not self.base_url:
             raise ValueError("JENKINS_URL is not configured")
 
-        if not self.username or not self.token:
-            raise ValueError(
-                "JENKINS_USERNAME or JENKINS_TOKEN is not configured"
-            )
+        if not self.username:
+            raise ValueError("JENKINS_USERNAME is not configured")
+
+        if not self.token:
+            raise ValueError("JENKINS_TOKEN is not configured")
 
         self.session = requests.Session()
-        self.session.auth = (self.username, self.token)
+        self.session.auth = (
+            self.username,
+            self.token
+        )
 
     def _get(self, endpoint: str):
+
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
 
         response = self.session.get(
@@ -36,6 +41,7 @@ class JenkinsClient:
         return response
 
     def get_jobs(self):
+
         response = self._get(
             "/api/json?tree=jobs[name,url,color]"
         )
@@ -43,6 +49,7 @@ class JenkinsClient:
         return response.json()
 
     def get_job(self, job_name: str):
+
         response = self._get(
             f"/job/{job_name}/api/json"
         )
@@ -50,6 +57,7 @@ class JenkinsClient:
         return response.json()
 
     def get_job_status(self, job_name: str):
+
         job = self.get_job(job_name)
 
         return {
@@ -58,18 +66,16 @@ class JenkinsClient:
             "color": job.get("color"),
             "buildable": job.get("buildable"),
             "lastBuild": job.get("lastBuild"),
-            "lastSuccessfulBuild": job.get("lastSuccessfulBuild"),
-            "lastFailedBuild": job.get("lastFailedBuild"),
+            "lastSuccessfulBuild": job.get(
+                "lastSuccessfulBuild"
+            ),
+            "lastFailedBuild": job.get(
+                "lastFailedBuild"
+            )
         }
 
-    def get_build(self, job_name: str, build_number: int):
-        response = self._get(
-            f"/job/{job_name}/{build_number}/api/json"
-        )
-
-        return response.json()
-
     def get_latest_build(self, job_name: str):
+
         job = self.get_job(job_name)
 
         latest_build = job.get("lastBuild")
@@ -79,20 +85,63 @@ class JenkinsClient:
 
         build_number = latest_build.get("number")
 
-        return self.get_build(job_name, build_number)
+        return self.get_build(
+            job_name,
+            build_number
+        )
 
-    def get_console_log(self, job_name: str, build_number: int):
+    def get_build(
+        self,
+        job_name: str,
+        build_number: int
+    ):
+
+        response = self._get(
+            f"/job/{job_name}/{build_number}/api/json"
+        )
+
+        return response.json()
+
+    def get_console_log(
+        self,
+        job_name: str,
+        build_number: int
+    ):
+
         response = self._get(
             f"/job/{job_name}/{build_number}/consoleText"
         )
 
         return response.text
 
-    def get_builds(self, job_name: str, limit: int = 20):
+    def get_builds(
+        self,
+        job_name: str,
+        limit: int = 10
+    ):
+
         response = self._get(
             f"/job/{job_name}/api/json"
             f"?tree=builds[number,result,timestamp,duration]"
-            f"[0:{limit}]"
         )
 
-        return response.json()
+        data = response.json()
+
+        builds = data.get("builds", [])
+
+        return {
+            "builds": builds[:limit]
+        }
+    # def get_builds(
+    #     self,
+    #     job_name: str,
+    #     limit: int = 10
+    # ):
+
+    #     response = self._get(
+    #         f"/job/{job_name}/api/json"
+    #         f"?tree=builds[number,result,timestamp,duration]"
+    #         f"[0:{limit}]"
+    #     )
+
+    #     return response.json()

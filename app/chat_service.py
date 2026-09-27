@@ -4,23 +4,39 @@ from app.response_builder import ResponseBuilder
 
 class ChatService:
 
-    def __init__(self, jenkins_client):
+    def __init__(
+        self,
+        jenkins_client
+    ):
 
         self.jenkins = jenkins_client
-        self.parser = QuestionParser()
-        self.response_builder = ResponseBuilder()
 
-    def answer(self, question: str):
+        self.parser = QuestionParser()
+
+        self.response_builder = (
+            ResponseBuilder()
+        )
+
+    def answer(
+        self,
+        question: str
+    ):
 
         if not question or not question.strip():
+
             return {
                 "success": False,
-                "answer": "Please enter a question."
+                "answer": (
+                    "Please enter a question."
+                )
             }
 
-        parsed = self.parser.parse(question)
+        parsed = self.parser.parse(
+            question
+        )
 
         intent = parsed["intent"]
+
         job_name = parsed["job_name"]
 
         try:
@@ -31,11 +47,15 @@ class ChatService:
 
             if intent == "list_jobs":
 
-                data = self.jenkins.get_jobs()
+                data = (
+                    self.jenkins.get_jobs()
+                )
 
                 answer = (
                     self.response_builder
-                    .build_jobs_response(data)
+                    .build_jobs_response(
+                        data
+                    )
                 )
 
                 return self._success(
@@ -44,21 +64,29 @@ class ChatService:
                 )
 
             # -------------------------
-            # JOB STATUS
+            # STATUS
             # -------------------------
 
             if intent == "status":
 
                 if not job_name:
-                    return self._missing_job_response()
 
-                data = self.jenkins.get_job_status(
-                    job_name
+                    return (
+                        self._missing_job()
+                    )
+
+                data = (
+                    self.jenkins
+                    .get_job_status(
+                        job_name
+                    )
                 )
 
                 answer = (
                     self.response_builder
-                    .build_status_response(data)
+                    .build_status_response(
+                        data
+                    )
                 )
 
                 return self._success(
@@ -73,15 +101,23 @@ class ChatService:
             if intent == "latest_build":
 
                 if not job_name:
-                    return self._missing_job_response()
 
-                build = self.jenkins.get_latest_build(
-                    job_name
+                    return (
+                        self._missing_job()
+                    )
+
+                build = (
+                    self.jenkins
+                    .get_latest_build(
+                        job_name
+                    )
                 )
 
                 answer = (
                     self.response_builder
-                    .build_latest_build_response(build)
+                    .build_latest_build_response(
+                        build
+                    )
                 )
 
                 return self._success(
@@ -96,23 +132,35 @@ class ChatService:
             if intent == "logs":
 
                 if not job_name:
-                    return self._missing_job_response()
 
-                build = self.jenkins.get_latest_build(
-                    job_name
+                    return (
+                        self._missing_job()
+                    )
+
+                build = (
+                    self.jenkins
+                    .get_latest_build(
+                        job_name
+                    )
                 )
 
                 if not build:
+
                     return self._success(
-                        "This job does not have any builds yet.",
+                        "This job doesn't have any builds yet.",
                         parsed
                     )
 
-                build_number = build.get("number")
+                build_number = (
+                    build.get("number")
+                )
 
-                logs = self.jenkins.get_console_log(
-                    job_name,
-                    build_number
+                logs = (
+                    self.jenkins
+                    .get_console_log(
+                        job_name,
+                        build_number
+                    )
                 )
 
                 answer = (
@@ -136,23 +184,35 @@ class ChatService:
             if intent == "failure_reason":
 
                 if not job_name:
-                    return self._missing_job_response()
 
-                build = self.jenkins.get_latest_build(
-                    job_name
+                    return (
+                        self._missing_job()
+                    )
+
+                build = (
+                    self.jenkins
+                    .get_latest_build(
+                        job_name
+                    )
                 )
 
                 if not build:
+
                     return self._success(
-                        "This job does not have any builds yet.",
+                        "This job doesn't have any builds yet.",
                         parsed
                     )
 
-                build_number = build.get("number")
+                build_number = (
+                    build.get("number")
+                )
 
-                logs = self.jenkins.get_console_log(
-                    job_name,
-                    build_number
+                logs = (
+                    self.jenkins
+                    .get_console_log(
+                        job_name,
+                        build_number
+                    )
                 )
 
                 answer = (
@@ -176,17 +236,28 @@ class ChatService:
             if intent == "build_history":
 
                 if not job_name:
-                    return self._missing_job_response()
 
-                data = self.jenkins.get_builds(
-                    job_name
+                    return (
+                        self._missing_job()
+                    )
+
+                data = (
+                    self.jenkins
+                    .get_builds(
+                        job_name
+                    )
                 )
 
-                builds = data.get("builds", [])
+                builds = data.get(
+                    "builds",
+                    []
+                )
 
                 answer = (
                     self.response_builder
-                    .build_history_response(builds)
+                    .build_history_response(
+                        builds
+                    )
                 )
 
                 return self._success(
@@ -195,7 +266,7 @@ class ChatService:
                 )
 
             # -------------------------
-            # UNKNOWN QUESTION
+            # UNKNOWN
             # -------------------------
 
             return self._success(
@@ -207,32 +278,48 @@ class ChatService:
         except Exception as ex:
 
             return {
+
                 "success": False,
+
                 "answer": (
-                    "I couldn't retrieve the requested "
-                    f"Jenkins information.\n\n"
+                    "I couldn't retrieve the "
+                    "Jenkins information.\n\n"
                     f"Error: {str(ex)}"
                 ),
+
                 "intent": intent,
+
                 "job_name": job_name
             }
 
-    def _success(self, answer, parsed):
+    def _success(
+        self,
+        answer,
+        parsed
+    ):
 
         return {
+
             "success": True,
+
             "answer": answer,
+
             "intent": parsed["intent"],
+
             "job_name": parsed["job_name"]
         }
 
-    def _missing_job_response(self):
+    def _missing_job(self):
 
         return {
+
             "success": False,
+
             "answer": (
-                "Please specify the Jenkins job name.\n\n"
-                "Example:\n"
-                "\"What is the status of ChatOps-Test-Job?\""
+                "Please specify the Jenkins "
+                "job name.\n\n"
+                "For example:\n"
+                "\"What is the status of "
+                "ChatOps-Test-Job?\""
             )
         }
